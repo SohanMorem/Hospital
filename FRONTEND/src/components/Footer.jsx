@@ -46,7 +46,7 @@ const Footer = () => {
           <address className="not-italic text-sm text-gray-300 leading-relaxed">
             123 Health St., Surat , Gujarat<br />
             Phone: <a href="tel:1234567890" className="hover:text-white">123-456-7890</a><br />
-            Email: <a href="mailto:info@hospital.com" className="hover:text-white">novacare@gmail.com</a>
+            Email: <a href="mailto:novacare2308@hospital.com" className="hover:text-white">novacare@gmail.com</a>
           </address>
         </div>
       </div>

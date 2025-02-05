@@ -6,6 +6,8 @@ import doctorModel from "../models/doctorModel.js"
 import jwt from "jsonwebtoken"
 
 
+
+
 // Api for add doctor
 
 const addDoctor=async (req,res)=>{
@@ -117,7 +119,7 @@ const AdminLogin=async(req,res)=>{
 
 const ListDoctor=async (req,res)=>{
     try {
-        const doctorData=await doctorModel.find()
+        const doctorData=await doctorModel.find({}).select("-password")
         res.json({success:true,doctorData})
     } catch (error) {
         console.log(error)
@@ -125,4 +127,15 @@ const ListDoctor=async (req,res)=>{
     }
 }
 
-export {addDoctor,AdminLogin,ListDoctor}
+const removeDoctor = async (req, res) => {
+    try {
+        const { docId } = req.body
+        const docData = await doctorModel.findByIdAndDelete(docId)
+        res.json({ success: true, message: "Doctor Deleted Successfully" })
+    }
+    catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export {addDoctor,AdminLogin,ListDoctor,removeDoctor}

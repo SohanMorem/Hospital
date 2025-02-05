@@ -196,7 +196,7 @@ const Navbar = () => {
                             </div>
                         </div>
                     :
-                    <button onClick={()=>{navigate('/login')}} className='bg-black hover:bg-primary hover:text-white text-white  rounded-full font-bold block md:px-6 md:py-4 md:text-base text-xl sm:hover:bg-primary sm:px-6 sm:py-2'>Create Account</button>
+                    <button onClick={()=>{navigate('/login')}} className='bg-black hover:bg-primary hover:text-white text-white  rounded-full font-bold block md:px-6 md:py-4 md:text-base text-xl sm:hover:bg-primary focus-visible:bg-primary sm:px-6 sm:py-2'>Create Account</button>
                 }
 
             </div>

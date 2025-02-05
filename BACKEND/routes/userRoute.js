@@ -16,4 +16,5 @@ userRouter.post('/userupdatepassword',updatePassword)
 userRouter.post('/userresendotp',resendOtp)
 
 
+
 export default userRouter

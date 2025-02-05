@@ -357,6 +357,4 @@ const resendOtp = async (req, res) => {
 
 
 
-
-
 export { registerUser, loginUser, getUserDetails, updateUserDetails,UserContact,userForgotPassword, userverifyotp, updatePassword, resendOtp}

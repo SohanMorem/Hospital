@@ -5,8 +5,9 @@ export const AppContext= createContext()
 
 const AppContextProvider=(props)=>{
 
+    const backendurl=import.meta.env.VITE_BACKEND_URL
     const value={
-
+        backendurl,
     }
 
     return(
