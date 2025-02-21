@@ -13,6 +13,8 @@ import Footer from './components/Footer'
 import ForgotPassword from './pages/ForgotPassword'
 import EnterOtp from './pages/EnterOtp'
 import ResetPassword from './pages/ResetPassword'
+import Success from './components/Success'
+import Cancel from './components/Cancel'
 
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
       <Routes>
         <Route path='/' element={<Home/>} />
         <Route path='/doctors' element={<Doctors />} />
+        <Route path='/success' element={<Success />} />
+        <Route path='/cancel' element={<Cancel />} />
         <Route path='/doctors/:speciality' element={<Doctors/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/about' element={<About/>} />

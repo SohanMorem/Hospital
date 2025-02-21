@@ -82,15 +82,15 @@ const Navbar = () => {
         <img
           onClick={() => navigate(`/`)}
           className="w-16 h-10 sm:w-20 sm:h-16 cursor-pointer"
-          src={assets.hospitalLogo}
+          src={assets.novacare_logo}
           alt=""
         />
-        {/* <h1
+        <h1
           onClick={() => navigate(`/`)}
-          className="cursor-pointer text-xl font-bold ml-3"
+          className="cursor-pointer text-3xl font-bold ml-3 text-purple-900 italic font-sans"
         >
           NovaCare
-        </h1> */}
+        </h1>
       </div>
 
       {/* Desktop Menu */}

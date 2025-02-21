@@ -19,6 +19,7 @@ import stripe_logo from './stripe_logo.png'
 import razorpay_logo from './razorpay_logo.png'
 import hospitalSlide1 from './Hospital1.jpg'
 import hospitalSlide2 from './Hospital2.jpg'
+import novacare_logo from './NovaCare_Health.png'
 import doc1 from './doc1.png'
 import doc2 from './doc2.png'
 import doc3 from './doc3.png'
@@ -63,7 +64,8 @@ export const assets = {
     upload_icon,
     stripe_logo,
     razorpay_logo,
-    hospitalLogo
+    hospitalLogo,
+    novacare_logo
 }
 
 export const specialityData = [

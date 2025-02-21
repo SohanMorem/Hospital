@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import { doctors } from "../assets/assets";
 import {toast} from "react-toastify"
 import axios from "axios"
 
@@ -14,6 +13,23 @@ const AppContextProvider=(props)=>{
     const currencySymbol="₹"
 
     const [userData,setUserData]=useState(false)
+    const [doctors,setDoctors]=useState([])
+
+    const  getDoctorsData=async ()=>{
+        try {
+            const {data}=await axios.get("http://localhost:4000/api/doctor/list")
+            if(data.success){
+                setDoctors(data.doctors)
+                console.log(data.doctors)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
+    } 
+
+    useEffect(()=>{
+        getDoctorsData()
+    },[])
 
     
 
@@ -36,6 +52,7 @@ const AppContextProvider=(props)=>{
 
     const value={
         doctors,
+        getDoctorsData,
         currencySymbol,
         token,
         setToken,

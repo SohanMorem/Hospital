@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams,useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext';
 import { assets } from '../assets/assets';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const Appointments = () => {
 
 
   const {docId} =useParams();
-  const {doctors} =useContext(AppContext)
+  const {doctors,token,backendurl,getDoctorsData} =useContext(AppContext)
   const daysOfWeek=['SUN','MON','TUE','WED','THU','FRI','SAT']
 
   const {currencySymbol}=useContext(AppContext)
@@ -15,6 +17,44 @@ const Appointments = () => {
   const [docSlots,setDocSlots]=useState([])
   const [slotIndex,setSlotIndex]=useState(0)
   const [slotTime,setSlotTime]=useState("")
+
+  const navigate = useNavigate()
+
+  const bookAppointment=async ()=>{
+    try {
+      if(!token){
+        toast.warn("login to book an appointment")
+        return navigate("/login")
+      }
+
+      if (!docSlots[slotIndex] || !slotTime) {
+        toast.warn("Please select a valid slot before booking.");
+        return;
+      }
+      
+
+      const date= docSlots[slotIndex][0].datetime
+
+      let day=date.getDate()
+      let month=date.getMonth()+1
+      let year=date.getFullYear()
+
+      const slotDate=day + "_" + month + "_" + year
+      console.log(slotDate)
+
+      const {data}=await axios.post(backendurl+"/api/user/bookappointment",{docId,slotDate,slotTime},{headers:{token}})
+      if(data.success){
+        toast.success(data.message)
+        getDoctorsData()
+        navigate('/myappointment')
+      }else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(error.message)
+    }
+  }
 
   const fetchDocInfo=async ()=>{
     const docInfo=doctors.find((doc)=>doc._id === docId)
@@ -50,11 +90,26 @@ const Appointments = () => {
       while(currentDate < endTime){
         let formattedTime=currentDate.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
 
+        let day=currentDate.getDate()
+        let month=currentDate.getMonth()+1
+        let year =currentDate.getFullYear()
 
+        const slotDate=day + "_" + month + "_" + year
+        const slotTime=formattedTime
+
+        const isSlotAvaialble= docInfo.slots_book[slotDate] && docInfo.slots_book[slotDate].includes(slotTime) ? false : true
+
+
+        if(isSlotAvaialble){
+
+          // add slot to an array
         timeSlot.push({
           datetime:new Date(currentDate),
           time:formattedTime
         })
+
+        }
+        
 
         currentDate.setMinutes(currentDate.getMinutes() + 30)
         
@@ -131,7 +186,7 @@ getAvailableSlots()
                 ))
               }
             </div>
-              <button className='bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6'>Book an Appointment</button>
+              <button onClick={bookAppointment} className='bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6'>Book an Appointment</button>
         </div>
 
     </div>
