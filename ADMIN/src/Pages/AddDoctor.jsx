@@ -89,7 +89,6 @@ const AddDoctor = () => {
         <div>
           <label className="block text-gray-600 text-sm mb-1">Speciality</label>
           <select onChange={(e)=>setSpeciality(e.target.value)} value={speciality} className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-            <option value="">General Physician</option>
             <option value="General physician">General physician</option>
             <option value="Gynecologist">Gynecologist</option>
             <option value="Dermatologist">Dermatologist</option>

@@ -6,7 +6,12 @@ import jwt from 'jsonwebtoken'
 import {sendContact, sendMail} from '../middleware/sendMail.js'
 import otpmodel from '../models/otpmodel.js'
 import sendMailforgot from '../middleware/forgotPassword.js'
-
+import {v2 as cloundinary } from "cloudinary"
+import doctorModel from '../models/doctorModel.js'
+import appointmentModel from '../models/appointmentModel.js'
+import sendSms from '../middleware/sendSms.js'
+import razorpay from "razorpay"
+import Stripe from 'stripe'
 // API for register user
 
 const registerUser = async (req, res) => {
@@ -141,13 +146,15 @@ const updateUserDetails=async (req,res)=>{
     try {
         console.log(req.body)
         const { userId, name, phone, address, dob, gender } = req.body
+        const imageFile=req.file
         console.log(req.body)
+        console.log(req.file)
 
 
         if (!name || !phone || !dob || !gender) {
-            return res.json({ success: false, message: "Data is missing" })
+            return res.json({ success: false, message: "Data is missing" });
         }
-
+      
         let parsedAddress;
         try {
             parsedAddress = address ? JSON.parse(address) : "";
@@ -157,6 +164,14 @@ const updateUserDetails=async (req,res)=>{
 
         await userModel.findByIdAndUpdate(userId, { name, phone, address: parsedAddress, dob, gender })
 
+        if(imageFile){
+            const imageUpload=await cloundinary.uploader.upload(imageFile.path,{resource_type:"image"})
+            const imageUrl= imageUpload.secure_url
+            await userModel.findByIdAndUpdate(userId,{image: imageUrl})
+            console.log("updated image")
+            // return res.json({success:true,message:"image updated successfully"})
+            
+        }
         res.json({ success: true, message: "profile updated Successfully" })
 
     } catch (error) {
@@ -350,11 +365,220 @@ const resendOtp = async (req, res) => {
   
     } catch (error) {
       console.error(error);
-      return res.json({ success: false, message: error.message });
+      res.json({ success: false, message: error.message });
     }
   };
+
+  // api to book appointment
+
+  const bookAppointment=async (req,res)=>{
+    try {
+        
+        const {userId,docId,slotDate,slotTime}=req.body
+
+        const docData= await doctorModel.findById(docId).select("-password")
+
+        if(!docData.available){
+            return res.json({success:false,message:"Doctor not Available"})
+        }
+
+        let slots_book=docData.slots_book
+
+        // checking slot available
+
+        if(slots_book[slotDate]){
+            if(slots_book[slotDate].includes(slotTime)){
+                return res.json({success:false,message:"Slot not Available"})
+            }else{
+                slots_book[slotDate].push(slotTime)
+            }
+        }else{
+            slots_book[slotDate]=[]
+            slots_book[slotDate].push(slotTime)
+        }
+
+        const userData=await userModel.findById(userId).select("-password")
+
+        delete docData.slots_book
+
+        const appointmentData={
+            userId,
+            docId,
+            userData,
+            docData,
+            amount:docData.fees,
+            slotTime,
+            slotDate,
+            date: Date.now()
+        }
+
+        const newAppointment=new appointmentModel(appointmentData)
+        await newAppointment.save()
+
+        // save new slot to doctors
+
+        await doctorModel.findByIdAndUpdate(docId,{slots_book})
+
+
+        res.json({success:true,message:"Appointment booked Successfully"})
+
+        // sendSms(userData.phone,"you have successfully booked an appointmnet")
+
+        const appointmentMessage = `<pre>
+Dear ${userData.name},
+
+Thank you for booking an appointment with us!
+
+Your appointment has been successfully scheduled on ${slotDate} at ${slotTime} with Dr. ${docData.name}. Please arrive a few minutes early to complete any necessary paperwork.
+
+If you have any questions or need to reschedule, please call us at  
+📞 <a href="tel:8140794715">8140794715</a>.
+
+
+Looking forward to seeing you soon!
+
+Best regards,  
+NovaCare Health Management
+</pre>`;
+
+    sendMail(userData.email,"BOOKING APPOINTMENT","",appointmentMessage)
+
+    } catch (error) {
+    console.error(error);
+    res.json({ success: false, message: error.message });
+    }
+  }
+
+  //api for displaying appointment
+
+  const ListBookAppointmnets=async(req,res)=>{
+    try {
+        const {userId}=req.body
+
+        const appointments=await appointmentModel.find({userId})
+
+        res.json({success:true,appointments})
+        
+    } catch (error) {
+        console.error(error);
+    res.json({ success: false, message: error.message });
+    }
+  }
+
+  // api for cancel appointment
+  const cancelAppointment= async (req,res)=>{
+    try {
+        const {userId,appointmentId}=req.body
+
+        const appointmentData=await appointmentModel.findById(appointmentId)
+    
+        if(appointmentData.userId == userId){
+            await appointmentModel.findByIdAndUpdate(appointmentId,{cancelled:true})
+    
+            const {docId,slotDate,slotTime}=appointmentData
+    
+            const doctorData=await doctorModel.findById(docId)
+    
+            let slots_book=doctorData.slots_book
+    
+            slots_book[slotDate]=slots_book[slotDate].filter((e)=>{
+                e !== slotTime
+            })
+    
+            await doctorModel.findByIdAndUpdate(docId,{slots_book})
+    
+            res.json({success:true,message:"Appointmnet Cancelled Succcessfully"})
+        }else{
+            res.json({success:false,message:"uuser not login"})
+        }
+    } catch (error) {
+        console.error(error);
+    res.json({ success: false, message: error.message });
+    }
+  }
+
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+const paymentIntegration=async (req,res)=>{
+    
+        try {
+            const { appointmentId } = req.body;
+            const appointmentData=await appointmentModel.findById(appointmentId)
+
+            if (!appointmentData) {
+                    return res.json({ success: false, message: "Booking Not Found" });
+                }
+            if (appointmentData.cancelled) {
+                    return res.json({ success: false, message: "Your Booking is Already Cancelled" });
+                }
+        
+           if(appointmentData){
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ["card"],
+                mode: "payment",
+                success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${process.env.CLIENT_URL}/cancel`,
+                line_items: [
+                  {
+                    price_data: {
+                      currency: "inr",
+                      product_data: {
+                        name: "Payment Integration",
+                      },
+                      unit_amount: appointmentData.amount * 100, // Convert to cents
+                    },
+                    quantity: 1,
+                  },
+                ],
+              });
+          
+              res.json({success:true, id: session.id });
+              await appointmentModel.findByIdAndUpdate(appointmentId,{payment:true})
+              const sendMailPayment=`<pre>Hello ${appointmentData.userData.name},
+
+Thank you for your payment. We have successfully received your transaction. Below are your payment details:
+
+Transaction ID: ${session.id}
+Amount Paid: ${session.amount_total / 100}
+Date: ${new Date(session.created * 1000)}
+A confirmation of this transaction has been recorded, and you may keep this email for your records. If you have any questions, feel free to contact our support team.
+
+Best Regards,
+NovaCare Health Management</pre>`;
+              
+        sendMail(appointmentData.userData.email,"Payment Confirmation - Your Transaction Was Successful","",sendMailPayment)
+           }else{
+                res.json({success:false,message:"Payment Failed"})
+           }
+          } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Error creating Stripe session" });
+          }
+    
+}
+
+const fetchTransactions=async (req,res)=>{
+    try {
+        const { sessionId } = req.body;
+        console.log("Session is:" + sessionId)
+        if (!sessionId) {
+          return res.json({ success:false,error: "Session ID is required" });
+        }
+    
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        console.log("sessions"+session)
+        
+        if (!session) {
+          return res.json({success:false,error: "Transaction not found" });
+        }
+    
+        res.json({success:true,session});
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+}
   
 
 
 
-export { registerUser, loginUser, getUserDetails, updateUserDetails,UserContact,userForgotPassword, userverifyotp, updatePassword, resendOtp}
+export { registerUser, loginUser, getUserDetails, updateUserDetails,UserContact,userForgotPassword, userverifyotp, updatePassword, resendOtp, bookAppointment, ListBookAppointmnets, cancelAppointment, paymentIntegration, fetchTransactions}
