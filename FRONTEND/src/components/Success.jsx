@@ -38,6 +38,7 @@ export default function Success() {
       console.log(data.session.id)
       console.log(data.session.amount_total)
       console.log(data.session.created)
+      console.log(data.session)
 
       if(data.success){
         console.log("hello")
@@ -55,7 +56,8 @@ export default function Success() {
       }
       console.log(transactionDetails)
     } catch (error) {
-      console.error("Error fetching transaction details:", error);
+      console.log(error)
+      toast.error("Error fetching transaction details:", error);
     }
   }
  

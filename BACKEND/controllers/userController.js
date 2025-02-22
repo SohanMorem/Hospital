@@ -517,7 +517,7 @@ const paymentIntegration=async (req,res)=>{
                 payment_method_types: ["card"],
                 mode: "payment",
                 success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${process.env.CLIENT_URL}/cancel`,
+                cancel_url: `${process.env.CLIENT_URL}/cancel?id=${appointmentId}`,
                 line_items: [
                   {
                     price_data: {
@@ -529,24 +529,17 @@ const paymentIntegration=async (req,res)=>{
                     },
                     quantity: 1,
                   },
-                ],
+                ],  
+                metadata: {
+                    appointmentId: String(appointmentData._id),  // Store appointment ID
+                    // userId: appointmentData.userId,  // Store user ID (optional)
+                    // customNote: "Payment for appointment booking" // Any additional info
+                }
               });
           
-              res.json({success:true, id: session.id });
-              await appointmentModel.findByIdAndUpdate(appointmentId,{payment:true})
-              const sendMailPayment=`<pre>Hello ${appointmentData.userData.name},
-
-Thank you for your payment. We have successfully received your transaction. Below are your payment details:
-
-Transaction ID: ${session.id}
-Amount Paid: ${session.amount_total / 100}
-Date: ${new Date(session.created * 1000)}
-A confirmation of this transaction has been recorded, and you may keep this email for your records. If you have any questions, feel free to contact our support team.
-
-Best Regards,
-NovaCare Health Management</pre>`;
+              res.json({success:true, url: session.url });
+            //   await appointmentModel.findByIdAndUpdate(appointmentId,{payment:true})
               
-        sendMail(appointmentData.userData.email,"Payment Confirmation - Your Transaction Was Successful","",sendMailPayment)
            }else{
                 res.json({success:false,message:"Payment Failed"})
            }
@@ -564,15 +557,43 @@ const fetchTransactions=async (req,res)=>{
         if (!sessionId) {
           return res.json({ success:false,error: "Session ID is required" });
         }
+
+        
     
         const session = await stripe.checkout.sessions.retrieve(sessionId);
-        console.log("sessions"+session)
+        console.log("sessions:",session)
         
         if (!session) {
           return res.json({success:false,error: "Transaction not found" });
         }
+
+        const appointmentId = session.metadata?.appointmentId;
+        console.log("Appointment ID:", appointmentId);
+
+        const appointmentData=await appointmentModel.findById(appointmentId)
+
+        if(session.payment_status === "paid"){
+            await appointmentModel.findByIdAndUpdate(appointmentId,{payment:true})
+            
+            const sendMailPayment=`<pre>Hello ${appointmentData.userData.name},
+
+Thank you for your payment. We have successfully received your transaction. Below are your payment details:
+
+Transaction ID: ${session.id}
+Amount Paid: ${session.amount_total / 100}
+Date: ${new Date(session.created * 1000)}
+A confirmation of this transaction has been recorded, and you may keep this email for your records. If you have any questions, feel free to contact our support team.
+
+Best Regards,
+NovaCare Health Management</pre>`;
+              
+        await sendMail(appointmentData.userData.email,"Payment Confirmation - Your Transaction Was Successful","",sendMailPayment)
+
+        return res.json({success:true,session});
+       }
     
-        res.json({success:true,session});
+       res.json({ success: false, message: "Payment not completed" });
+       
       } catch (error) {
         res.status(500).json({ error: error.message });
       }

@@ -144,8 +144,6 @@ const stripePromise = loadStripe("pk_test_51QuYyWHfp1Ms590tgHhRMMwhDODINYDLjw5iu
 
 const MyAppointment = () => {
 
-  const [loading, setLoading] = useState(false);
-
   const { token,backendurl,getDoctorsData } = useContext(AppContext);
 
   const [appointments,setAppointments]=useState([])
@@ -187,32 +185,26 @@ const MyAppointment = () => {
   }
 
   const paymentIntegration=async (appointmentId)=>{
-    setLoading(true);
     try {
 
       if(!appointmentId){
         toast.error("Appointment not found")
       }
 
-      // const {data}=await axios.post(backendurl+'/api/user/paymentintegration',{appointmentId},{headers:{token}})
-
-      // console.log(data)
-      
-      // if (data.success) {
-       
-      //   console.log("Client Secret:", data.clientSecret);
-
-
-      // } else {
-      //   toast.error(data.message || "Payment integration failed");
-      // }
-
       const response=await axios.post(backendurl+"/api/user/paymentintegration",{appointmentId},{headers:{token}})
 
-      const session = await response.data;
+      // const {sessionId} = await response.data;
+      const {url} = await response.data;
       const stripe = await stripePromise;
 
-      await stripe.redirectToCheckout({ sessionId: session.id });
+      if (!url) {
+        toast.error("Failed to retrieve session ID.");
+        return;
+    }
+
+      // await stripe.redirectToCheckout({ sessionId });
+
+      window.location.href = url
 
     } catch (error) {
       console.log(error)
@@ -274,7 +266,7 @@ const MyAppointment = () => {
               {/* Actions */}
               <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-stretch sm:items-center">
 
-                {!appointment.cancelled && !appointment.payment && <button className="w-full sm:w-auto  px-4 py-2 rounded bg-blue-400 text-white hover:bg-primary transition-all duration-300" onClick={()=>paymentIntegration(appointment._id)} disabled={loading}>
+                {!appointment.cancelled && !appointment.payment && <button className="w-full sm:w-auto  px-4 py-2 rounded bg-blue-400 text-white hover:bg-primary transition-all duration-300" onClick={()=>paymentIntegration(appointment._id)} >
                 Pay Amount
                 </button>}
                 
