@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 const Contact = () => {
   // State to manage form data and errors
 
-  const {backendurl}=useContext(AppContext)
+  const {backendurl,token}=useContext(AppContext)
 
   const [username,setUsername]=useState("")
   const [email,setEmail]=useState("")
@@ -46,7 +46,7 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-        const {data} = await axios.post(backendurl+"/api/user/usercontact",{username,email,phone,message})
+        const {data} = await axios.post(backendurl+"/api/user/usercontact",{username,email,phone,message},{headers:{token}})
         if(data.success){
           toast.success(data.message)
         }else{

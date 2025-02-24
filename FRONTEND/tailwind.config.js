@@ -11,7 +11,10 @@ export default {
       },
       gridTemplateColumns:{
         'auto':'repeat(auto-fill,minmax(200px,1fr))'
-      }
+      },
+      fontFamily: {
+        'poppins': ['Poppins', 'sans-serif'],
+      },
     },
   },
   plugins: [],

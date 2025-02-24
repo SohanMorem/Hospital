@@ -4,7 +4,9 @@ import bcrypt from "bcrypt"
 import {v2 as cloundinary} from "cloudinary"
 import doctorModel from "../models/doctorModel.js"
 import jwt from "jsonwebtoken"
-
+import appointmentModel from "../models/appointmentModel.js"
+import mongoose from "mongoose"
+import userModel from "../models/userModel.js"
 
 
 
@@ -138,4 +140,90 @@ const removeDoctor = async (req, res) => {
     }
 }
 
-export {addDoctor,AdminLogin,ListDoctor,removeDoctor}
+const listAppointment=async (req,res)=>{
+    try {
+
+        const appointmentData=await appointmentModel.find({})
+        res.json({success:true,appointmentData})
+        
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+const cancelAppointment=async (req,res)=>{
+    try {
+        const {appointmentId}=req.body
+        const appointmentData=await appointmentModel.findById(appointmentId)
+        if(!appointmentData || appointmentData.cancelled){
+            return res.json({success:true,message:"Appointment not found or already cancelled"})
+        }
+        // const docId=appointmentData.docData._id.toString()
+        
+        const docId = appointmentData.docData._id
+        console.log("doc:",docId,"app:",appointmentId)
+        if(appointmentData){
+            await appointmentModel.findByIdAndUpdate(appointmentId,{cancelled:true})
+    
+            const {slotDate,slotTime}=appointmentData
+    
+            const doctorData=await doctorModel.findById(docId)
+    
+            let slots_book=doctorData.slots_book
+    
+            slots_book[slotDate]=slots_book[slotDate].filter((e)=>{
+                e !== slotTime
+            })
+    
+            await doctorModel.findByIdAndUpdate(docId,{slots_book})
+    
+            res.json({success:true,message:"Appointment Cancelled Succcessfully"})
+        
+    } }catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+const totalAppointment=async (req,res)=>{
+    try {
+        const appointments=(await appointmentModel.find({})).length
+        res.json({success:true,appointments})
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+const totalDoctor=async (req,res)=>{
+    try {
+        const doctors=(await doctorModel.find({})).length
+        res.json({success:true,doctors})
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+const totalUser=async (req,res)=>{
+    try {
+        const users=(await userModel.find({})).length
+        res.json({success:true,users})
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+const latestAppointment=async (req,res)=>{
+    try {
+        const appointmentData=await appointmentModel
+        .find({})
+        .sort({ _id: -1 })
+        .limit(5);
+        if(!appointmentData){
+            res.json({success:false,message:"Appointments not found"})
+        }
+        res.json({success:true,appointmentData})
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export {addDoctor,AdminLogin,ListDoctor,removeDoctor, listAppointment, cancelAppointment, totalAppointment, totalDoctor, totalUser, latestAppointment}

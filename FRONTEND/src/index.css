@@ -4,9 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
-  font-family: "Poppins", serif;
+body {
+  font-family: 'Poppins', sans-serif;
 }
+
 .active hr{
   @apply block;
 }

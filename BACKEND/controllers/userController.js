@@ -163,6 +163,7 @@ const updateUserDetails=async (req,res)=>{
         }
 
         await userModel.findByIdAndUpdate(userId, { name, phone, address: parsedAddress, dob, gender })
+        
 
         if(imageFile){
             const imageUpload=await cloundinary.uploader.upload(imageFile.path,{resource_type:"image"})
@@ -172,6 +173,25 @@ const updateUserDetails=async (req,res)=>{
             // return res.json({success:true,message:"image updated successfully"})
             
         }
+        const updatedFields = { 
+            "userData.name": name, 
+            "userData.phone": phone, 
+            "userData.dob": dob, 
+            "userData.gender": gender, 
+            "userData.address": parsedAddress 
+          };
+          
+          if (imageFile) {
+            const imageUpload=await cloundinary.uploader.upload(imageFile.path,{resource_type:"image"})
+            const imageUrl= imageUpload.secure_url
+            updatedFields["userData.image"] = imageUrl;
+          }
+
+          await appointmentModel.updateMany(
+            { userId },
+            { $set: updatedFields }
+          );
+
         res.json({ success: true, message: "profile updated Successfully" })
 
     } catch (error) {

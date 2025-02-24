@@ -7,6 +7,7 @@ import Navbar from "./Components/navbar"
 import { useContext } from "react"
 import { AdminContext } from "./context/AdminContextProvider"
 import Slidebar from "./Components/Slidebar"
+import ListAppointment from "./Pages/ListAppointment"
 
 function App() {
 
@@ -20,7 +21,7 @@ function App() {
             <Routes>
               <Route path="/" element={<></>}></Route>
               <Route path="/adminDashboard" element={<Dashboard/>}></Route>
-              <Route path="/allAppointments" element={<Dashboard/>}></Route>
+              <Route path="/allAppointments" element={<ListAppointment/>}></Route>
               <Route path="/addDoctor" element={<AddDoctor/>}></Route>
               <Route path="/ListDoctor" element={<ListDoctor/>}></Route>
             </Routes>
