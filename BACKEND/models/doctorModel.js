@@ -17,5 +17,6 @@ const doctorSchema=mongoose.Schema({
 },{minimize:false})
 
 const doctorModel=mongoose.models.doctor || mongoose.model('doctor',doctorSchema)
+// const doctorModel = mongoose.models.Doctor || mongoose.model("Doctor", doctorSchema);
 
 export default doctorModel

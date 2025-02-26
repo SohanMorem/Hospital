@@ -128,30 +128,60 @@ const MyAppointment = () => {
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-stretch sm:items-center">
+              {/* Actions (Hidden if Completed) */}
+              {!appointment.isCompleted && (
+                <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  
+                  {/* Payment Button */}
+                  {!appointment.cancelled && !appointment.payment && (
+                    <button className="w-full sm:w-auto px-4 py-2 rounded bg-blue-400 text-white hover:bg-blue-600 transition-all duration-300"
+                            onClick={() => paymentIntegration(appointment._id)}>
+                      Pay Amount
+                    </button>
+                  )}
 
-                {!appointment.cancelled && !appointment.payment && <button className="w-full sm:w-auto  px-4 py-2 rounded bg-blue-400 text-white hover:bg-primary transition-all duration-300" onClick={()=>paymentIntegration(appointment._id)} >
-                Pay Amount
-                </button>}
-                
-                {appointment.payment && <button className="w-full sm:w-auto border px-4 py-2 rounded  border-blue-500 bg-gray-200 font-poppins text-blue-600">
-                  Payment Done
-                </button>}
-                {!appointment.cancelled && (appointment.payment || !appointment.payment) && 
-                <button className="w-full sm:w-auto  px-4 py-2 rounded bg-red-400 text-white hover:bg-red-600 transition-all duration-300"  onClick={()=>cancelAppointment(appointment._id)}>
-                  Cancel Appointment
+                  {/* Payment Done Indicator */}
+                  {appointment.payment && (
+                    <button className="w-full sm:w-auto border px-4 py-2 rounded border-blue-500 bg-gray-200 text-blue-600 font-semibold">
+                      Payment Done
+                    </button>
+                  )}
+
+                  {/* Cancel Appointment Button */}
+                  {!appointment.cancelled && (
+                    <button className="w-full sm:w-auto px-4 py-2 rounded bg-red-400 text-white hover:bg-red-600 transition-all duration-300"
+                            onClick={() => cancelAppointment(appointment._id)}>
+                      Cancel Appointment
+                    </button>
+                  )}
+
+                  {/* Canceled Appointment Indicator */}
+                  {appointment.cancelled && (
+                    <button className="w-full sm:w-auto border px-4 py-2 rounded border-red-500 bg-gray-200 text-red-600 font-semibold">
+                      Canceled Appointment
+                    </button>
+                  )}
+
+                 
+                </div>
+              )}
+
+                 {/* Completed Indicator */}
+              {appointment.isCompleted && (
+                <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <button className="h-16 w-full text-2xl bg-gray-200 text-green-600 font-semibold py-2 px-4 rounded">
+                  Completed
                 </button>
-                }
-                {appointment.cancelled && appointment.payment && <button className="w-full sm:w-auto border px-4 py-2 rounded font-poppins border-red-500 bg-gray-200 text-red-600">
-                  Cancelled Appointment
-                </button>}
-                
-              </div>
+                </div>
+              )}
+              
+
             </div>
           ))}
+
         </div>
       </div>
+      
     </div>
   );
 };

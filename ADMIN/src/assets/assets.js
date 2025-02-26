@@ -12,9 +12,12 @@ import appointments_icon from './appointments_icon.svg'
 import earning_icon from './earning_icon.svg'
 import patients_icon from './patients_icon.svg'
 import HospitalLogo from "./NovaCare_Health.png"
+import upload_area1 from "./upload_area.png"
+import upload_icon from "./upload_icon.png"
 
 export const assets = {
     HospitalLogo,
+    upload_icon,
     add_icon,
     admin_logo,
     appointment_icon,

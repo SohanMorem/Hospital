@@ -9,8 +9,6 @@ import sendMailforgot from '../middleware/forgotPassword.js'
 import {v2 as cloundinary } from "cloudinary"
 import doctorModel from '../models/doctorModel.js'
 import appointmentModel from '../models/appointmentModel.js'
-import sendSms from '../middleware/sendSms.js'
-import razorpay from "razorpay"
 import Stripe from 'stripe'
 // API for register user
 
@@ -185,6 +183,7 @@ const updateUserDetails=async (req,res)=>{
             const imageUpload=await cloundinary.uploader.upload(imageFile.path,{resource_type:"image"})
             const imageUrl= imageUpload.secure_url
             updatedFields["userData.image"] = imageUrl;
+            console.log("update image appointment")
           }
 
           await appointmentModel.updateMany(
@@ -517,6 +516,8 @@ NovaCare Health Management
     }
   }
 
+
+  // api for payment
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const paymentIntegration=async (req,res)=>{

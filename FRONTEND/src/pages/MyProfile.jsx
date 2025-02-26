@@ -74,6 +74,7 @@ const MyProfile = () => {
   }
 
   return userData && (
+    
     <div className='max-w-lg flex flex-col gap-2 text-sm'>
       {
         isEdit ?
