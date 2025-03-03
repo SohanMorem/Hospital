@@ -107,7 +107,7 @@ const Login = () => {
                 Password
               </label>
               <input
-                type="text"
+                type="password"
                 id="password"
                 name="password"
                 className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -127,7 +127,7 @@ const Login = () => {
                   Confirm Password
                 </label>
                 <input
-                  type="text"
+                  type="password"
                   id="cpassword"
                   name="cpassword"
                   className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"

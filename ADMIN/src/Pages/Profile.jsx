@@ -3,6 +3,7 @@ import { DoctorContext } from '../context/DoctorContextProvider';
 import { assets } from '../assets/assets';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useEffect } from 'react';
 
 const Profile = () => {
     const [isEdit, setIsedit] = useState(false);
@@ -39,6 +40,10 @@ const Profile = () => {
             toast.error(error.message);
         }
     };
+
+    useEffect(()=>{
+        getDoctorDetail()
+},[dtoken])
 
     return doctorData && (
         <div className='max-w-lg flex flex-col gap-4 text-sm'>

@@ -186,7 +186,7 @@ const updateUserDetails=async (req,res)=>{
             console.log("update image appointment")
           }
 
-          await appointmentModel.updateMany(
+           appointmentModel.updateMany(
             { userId },
             { $set: updatedFields }
           );

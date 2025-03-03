@@ -43,8 +43,10 @@ const DoctorContextProvider=(props)=>{
     
 
     useEffect(()=>{
-        getDoctorDetail()
-    },[DOMTokenList])
+        if (dtoken) {
+            getDoctorDetail();
+        }
+    },[dtoken])
 
     const value={
         dtoken,

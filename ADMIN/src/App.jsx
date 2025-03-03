@@ -1,56 +1,58 @@
-import { Routes, Route } from "react-router-dom"
-import Dashboard from "./Pages/Dashboard"
-import ListDoctor from "./Pages/ListDoctor"
-import AddDoctor from "./Pages/AddDoctor"
-import Login from "./Pages/Login"
-import Navbar from "./Components/navbar"
-import { useContext } from "react"
-import { AdminContext } from "./context/AdminContextProvider"
-import Slidebar from "./Components/Slidebar"
-import ListAppointment from "./Pages/ListAppointment"
-import { DoctorContext } from "./context/DoctorContextProvider"
-import DoctorAppointment from "./Pages/DoctorAppointment"
-import DoctorDashboard from "./Pages/DoctorDashboard"
-import Profile from "./Pages/Profile"
+import { Routes, Route } from "react-router-dom";
+import Dashboard from "./Pages/Dashboard";
+import ListDoctor from "./Pages/ListDoctor";
+import AddDoctor from "./Pages/AddDoctor";
+import Login from "./Pages/Login";
+import Navbar from "./Components/Navbar";
+import { useContext } from "react";
+import { AdminContext } from "./context/AdminContextProvider";
+import Slidebar from "./Components/Slidebar";
+import ListAppointment from "./Pages/ListAppointment";
+import { DoctorContext } from "./context/DoctorContextProvider";
+import DoctorAppointment from "./Pages/DoctorAppointment";
+import DoctorDashboard from "./Pages/DoctorDashboard";
+import Profile from "./Pages/Profile";
 
 function App() {
+  const { atoken } = useContext(AdminContext);
+  const { dtoken } = useContext(DoctorContext);
 
-  const {atoken}=useContext(AdminContext)
-  const {dtoken}=useContext(DoctorContext)
-
-  return atoken?
-        <div>
-          <Navbar></Navbar>
-          <div className="flex items-start">
-            <Slidebar></Slidebar>
-            <Routes>
-              <Route path="/" element={<></>}></Route>
-              <Route path="/adminDashboard" element={<Dashboard/>}></Route>
-              <Route path="/allAppointments" element={<ListAppointment/>}></Route>
-              <Route path="/addDoctor" element={<AddDoctor/>}></Route>
-              <Route path="/ListDoctor" element={<ListDoctor/>}></Route>
-            </Routes>
-          </div>
-          
+  if (atoken) {
+    return (
+      <div>
+        <Navbar />
+        <div className="flex items-start">
+          <Slidebar />
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/adminDashboard" element={<Dashboard />} />
+            <Route path="/allAppointments" element={<ListAppointment />} />
+            <Route path="/addDoctor" element={<AddDoctor />} />
+            <Route path="/ListDoctor" element={<ListDoctor />} />
+          </Routes>
         </div>
-  :
-  dtoken?
-  <div>
-  <Navbar></Navbar>
-  <div className="flex items-start">
-    <Slidebar></Slidebar>
-    <Routes>
-              <Route path="/" element={<></>}></Route>
-              <Route path="/doctorDashboard" element={<DoctorDashboard/>}></Route>
-              <Route path="/Appointments" element={<DoctorAppointment/>}></Route>
-              <Route path="/profile" element={<Profile/>}></Route>
-    </Routes>
-    </div>
-  </div>
-  :
-  (
-    <Login></Login>
-  )
+      </div>
+    );
+  }
+
+  if (dtoken) {
+    return (
+      <div>
+        <Navbar />
+        <div className="flex items-start">
+          <Slidebar />
+          <Routes>
+            <Route path="/" element={<DoctorDashboard />} />
+            <Route path="/doctorDashboard" element={<DoctorDashboard />} />
+            <Route path="/Appointments" element={<DoctorAppointment />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+        </div>
+      </div>
+    );
+  }
+
+  return <Login />;
 }
 
-export default App
+export default App;
